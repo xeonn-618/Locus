@@ -6,7 +6,7 @@ import config
 def run(sim):
 
     # Create fig, ax objects
-    fig, ax = plt.subplots(figsize=(8,8))
+    fig, ax = plt.subplots(figsize=(6,6))
 
     # Create a grass heatmap
     grass_map = ax.imshow(sim.grass, cmap='Greens', interpolation='nearest', alpha=0.75)

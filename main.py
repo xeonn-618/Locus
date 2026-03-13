@@ -12,7 +12,7 @@ rng = np.random.default_rng()
 grass_noise = rng.integers(low=0, high=100, size=(config.matrix_size, config.matrix_size))
 
 # Apply gaussion filter to noisy matrix to get a smooth field
-grass_noise_smoothed = gaussian_filter(grass_noise, sigma=config.sigma)\
+grass_noise_smoothed = gaussian_filter(grass_noise, sigma=config.sigma)
 
 # Normalize the smooth noise into integers
 normalized =(grass_noise_smoothed - grass_noise_smoothed.min())/ (grass_noise_smoothed.max() - grass_noise_smoothed.min())
