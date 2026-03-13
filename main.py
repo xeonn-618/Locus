@@ -5,6 +5,8 @@ import config
 from simulator import Simulator
 import animate
 
+
+
 # Random number generator
 rng = np.random.default_rng()
 
@@ -18,8 +20,14 @@ grass_noise_smoothed = gaussian_filter(grass_noise, sigma=config.sigma)
 normalized =(grass_noise_smoothed - grass_noise_smoothed.min())/ (grass_noise_smoothed.max() - grass_noise_smoothed.min())
 grass_matrix = (normalized * 100).astype(int)
 
-# Create the simulation object
-MySim = Simulator(grass_matrix)
 
-# Run the simulation and animation
-animate.run(MySim)
+
+
+# Create the simulation object
+MySim = Simulator(config.initial_population_size, grass_matrix, config.initial_p)
+
+if __name__ == '__main__':
+    print(f"| {'Tick':^9} | {'N':^7} | {'p':^7} |")
+    print("-" * 33)
+    # Run the simulation and animation
+    animate.run(MySim)
