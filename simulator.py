@@ -30,7 +30,7 @@ class Simulator():
         # We keep track of individuals by their array index
         self.population_coords = self.rng.integers(0, grass.shape[0], size=(N,2)) # ndarray([[X1, Y1], [X2, Y2]])
         self.population_sex = np.random.choice( [0, 1], N) # 0: Female, 1: Male
-        self.population_age = self.rng.integers(1, 10, size=N) # Assign random ages between 1 to 10
+        self.population_age = self.rng.integers(1, 10, size=(N,)) # Assign random ages between 1 to 10
         self.population_energy = np.full(N, config.initial_energy) # Assign initial energy to each individual
         self.population_isPregnant = np.zeros(N, dtype=bool) # All starting individuals start off not pregnant
         self.population_mateable = (self.population_age >= config.maturity_age) & (~self.population_isPregnant) 
@@ -123,6 +123,25 @@ class Simulator():
         # Set negative grass lengths to zero
         self.grass[x_coords, y_coords] = np.clip(self.grass[x_coords, y_coords], 0, None)
 
+    def deer_die(self):
+        
+        # Select survivors/alive deer
+        survivor_mask = self.population_energy > 0
+
+        # Update each array to inlcude only survivors
+        self.population_energy = self.population_energy[survivor_mask]
+        self.population_age = self.population_age[survivor_mask]
+        self.population_coords = self.population_coords[survivor_mask]
+        self.population_genotype = self.population_genotype[survivor_mask]
+        self.population_germ_genotype = self.population_germ_genotype[survivor_mask]
+        self.population_isPregnant = self.population_isPregnant[survivor_mask]
+        self.population_mateable = self.population_mateable[survivor_mask]
+        self.population_sex = self.population_sex[survivor_mask]
+
+        # Update population varaibles
+        self.N = len(self.population_energy)
+
+
     def run_tick(self):
         print(f"| {self.tick:^9} | {self.N:^7} | {self.p:^7} | {self.population_energy.mean():^9} | {self.grass.mean():^5}")
 
@@ -134,6 +153,9 @@ class Simulator():
 
         # Deer eats gras
         self.deer_eat()
+
+        # Deer die
+        self.deer_die()
 
         # Update tick
         self.tick += 1

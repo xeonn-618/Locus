@@ -12,10 +12,10 @@ def run(sim):
     grass_map = ax.imshow(sim.grass, cmap='Greens', interpolation='nearest', alpha=0.5)
 
     # Create a population scatter map
-    population_map = ax.scatter(sim.population_coords[:, 0], sim.population_coords[:, 1], alpha=1, marker='d')
+    population_map = ax.scatter(sim.population_coords[:, 0], sim.population_coords[:, 1], alpha=1, marker='o')
 
     # Set plot title and legend
-    ax.set_title('Grass Simulation')
+    ax.set_title('Grass & Deer Simulation')
     # ax.legend(loc='upper right')
 
     # Create text to show information
