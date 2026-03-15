@@ -83,8 +83,17 @@ class Simulator():
         # Find index of highest grass value of 9 possible moves for every N
         best_moves_indicies = np.argmax(food_values, axis=1)
 
+        # Implement random wander
+        is_wandering = self.rng.random(self.N) < config.exploration_rate
+
+        # Generate random wander indicies
+        random_move_indicies = self.rng.integers(0, len(self.moves), size=self.N)
+
+        # Find final moves
+        final_move_indicies = np.where(is_wandering, random_move_indicies, best_moves_indicies)
+
         # Find best coordinate to move for each N
-        best_coords = potential_moves[np.arange(self.N), best_moves_indicies]
+        best_coords = potential_moves[np.arange(self.N), final_move_indicies]
         
         # Find distance moved by each deer
         dist_moved = (np.abs(best_coords[:, 0] - self.population_coords[:, 0]) + 
@@ -106,7 +115,7 @@ class Simulator():
         grass_eaten = np.minimum(available_grass, config.max_eat)
 
         # Add energy of eaten grass to individuals
-        self.population_energy += grass_eaten * config.digestion_efficency
+        self.population_energy += (grass_eaten * config.digestion_efficency).astype(int)
 
         # Remove the eaten grass
         self.grass[x_coords, y_coords] -= grass_eaten
@@ -122,6 +131,9 @@ class Simulator():
 
         # Move the deer
         self.deer_move()
+
+        # Deer eats gras
+        self.deer_eat()
 
         # Update tick
         self.tick += 1
