@@ -6,8 +6,8 @@ import config
 rng = np.random.default_rng()
 
 # Moves - array of possible positions to move
-moves = np.array([[-1,1], [0,1], [1,1],
-                  [-1,0], [0,0], [1,0],
+moves = np.array([[0,0], [-1,1], [0,1], [1,1],
+                  [-1,0],  [1,0],
                    [-1,-1], [0,-1], [1,-1] ])
 
 class Simulator():
