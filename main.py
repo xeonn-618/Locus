@@ -21,8 +21,6 @@ normalized =(grass_noise_smoothed - grass_noise_smoothed.min())/ (grass_noise_sm
 grass_matrix = (normalized * 100).astype(int)
 
 
-
-
 # Create the simulation object
 MySim = Simulator(config.initial_population_size, grass_matrix, config.initial_p)
 

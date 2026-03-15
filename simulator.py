@@ -5,6 +5,11 @@ import config
 # Random Number Generator
 rng = np.random.default_rng()
 
+# Moves - array of possible positions to move
+moves = np.array([[-1,1], [0,1], [1,1],
+                  [-1,0], [0,0], [1,0],
+                   [-1,-1], [0,-1], [1,-1] ])
+
 class Simulator():
     def __init__(self, N, grass, p) -> None:
         self.grass = grass # A 2-D matrix
@@ -25,6 +30,14 @@ class Simulator():
         self.population_genotype = rng.binomial(n=1, p=p, size=(N,2)) # 0: recessive allele, 1: dominant allele
         self.population_germ_genotype = np.copy(self.population_genotype) # Initialize the germ genotype to be same as parent in beginning
 
+        # Occupancy grid
+        self.occupancy_grid = np.zeros(grass.shape, dtype=bool)
+
+        # Update occupancy grid to randomly placed starting population
+        self.occupancy_grid[self.population_coords[:, 0], self.population_coords[:, 1]] = True 
+
+
+
     # Grow the grass by a random range
     def grow_grass(self):
         # Create a random noise growth map
@@ -42,11 +55,47 @@ class Simulator():
         # Clip all grass above grass_max_length
         self.grass = np.clip(self.grass, 0, config.grass_max_length)
 
+    def deer_move(self):
+
+        # Create potential moves array for each deer via np broadcasting (N, 9, 2)
+        potential_moves = self.population_coords[:, np.newaxis, :] + moves
+
+        # Set limits to prevent going out of bounds
+        max_x = self.grass.shape[0] - 1
+        max_y = self.grass.shape[1] - 1
+        potential_moves[:, :, 0] = np.clip(potential_moves[:,:,0], 0, max_x) # Clip all potential moves going out of bounds in X axis
+        potential_moves[:, :, 1] = np.clip(potential_moves[:,:,1], 0, max_y) # Clip all potential moves going out of bounds in Y axis
+
+        # Take the indicies and get food values at the possible positions
+        x_indicies = potential_moves[:,:,0]
+        y_indicies = potential_moves[:,:,1]
+        
+        # Food values (N, 9)
+        food_values = self.grass[x_indicies, y_indicies]
+
+        # Find index of highest grass value of 9 possible moves for every N
+        best_moves_indicies = np.argmax(food_values, axis=1)
+
+        # Find best coordinate to move for each N
+        best_coords = potential_moves[np.arange(self.N), best_moves_indicies]
+
+        # Find individuals who are going to move from their current position
+        moved_deer = (self.population_coords != best_coords).any(axis=1)
+
+        # Subtract the energy cost of moving from their energy pool
+        self.population_energy[moved_deer] -= config.cost_move
+
+        # Move each deer to its new best coord
+        self.population_coords = best_coords
+
     def run_tick(self):
         print(f"| {self.tick:^9} | {self.N:^7} | {self.p:^7} |")
 
         # Grow the grass
         self.grow_grass()
+
+        # Move the deer
+        self.deer_move()
 
         # Update tick
         self.tick += 1

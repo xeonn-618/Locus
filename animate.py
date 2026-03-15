@@ -9,7 +9,10 @@ def run(sim):
     fig, ax = plt.subplots(figsize=(6,6))
 
     # Create a grass heatmap
-    grass_map = ax.imshow(sim.grass, cmap='Greens', interpolation='nearest', alpha=0.75)
+    grass_map = ax.imshow(sim.grass, cmap='Greens', interpolation='nearest', alpha=0.5)
+
+    # Create a population scatter map
+    population_map = ax.scatter(sim.population_coords[:, 0], sim.population_coords[:, 1], alpha=1, marker='d')
 
     # Set plot title and legend
     ax.set_title('Grass Simulation')
@@ -17,7 +20,7 @@ def run(sim):
 
     # Create text to show information
     text = ax.text(
-        0.03, 0.97, f'Tick: {sim.tick}\nAvg Food: {np.mean(sim.grass)}',
+        0.03, 0.97, f'Tick: {sim.tick}\nAvg Food: {np.mean(sim.grass)}\nN: {sim.N}',
         transform=ax.transAxes, # Relative to axes
         fontsize=10,
         verticalalignment='top',
@@ -31,7 +34,7 @@ def run(sim):
         sim.run_tick()
 
         # Update the text
-        status_text = f"Tick: {sim.tick}\nAvg Food: {np.mean(sim.grass)}"
+        status_text = f"Tick: {sim.tick}\nAvg Food: {np.mean(sim.grass)}\nN: {sim.N}"
         text.set_text(status_text)
 
         # Update grass heatmap
@@ -40,8 +43,11 @@ def run(sim):
         # Update limits of heatmap as grass range changes
         grass_map.set_clim(vmin=np.min(sim.grass), vmax=np.max(sim.grass))
 
+        # Update population map
+        population_map.set_offsets(sim.population_coords)
+
         # Return the axes objects
-        return [grass_map, text]
+        return [grass_map, text, population_map]
 
     # Create the animation object
     ani = animation.FuncAnimation(fig,
