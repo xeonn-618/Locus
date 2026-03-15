@@ -96,8 +96,26 @@ class Simulator():
         # Move each deer to its new best coord
         self.population_coords = best_coords
 
+    def deer_eat(self):
+        x_coords = self.population_coords[:, 0]
+        y_coords = self.population_coords[:, 1]
+
+        available_grass = self.grass[x_coords, y_coords]
+
+        # Array of amount of grass eaten by each deer
+        grass_eaten = np.minimum(available_grass, config.max_eat)
+
+        # Add energy of eaten grass to individuals
+        self.population_energy += grass_eaten * config.digestion_efficency
+
+        # Remove the eaten grass
+        self.grass[x_coords, y_coords] -= grass_eaten
+
+        # Set negative grass lengths to zero
+        self.grass[x_coords, y_coords] = np.clip(self.grass[x_coords, y_coords], 0, None)
+
     def run_tick(self):
-        print(f"| {self.tick:^9} | {self.N:^7} | {self.p:^7} | {self.population_energy.mean():^9}")
+        print(f"| {self.tick:^9} | {self.N:^7} | {self.p:^7} | {self.population_energy.mean():^9} | {self.grass.mean():^5}")
 
         # Grow the grass
         self.grow_grass()

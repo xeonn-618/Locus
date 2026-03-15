@@ -16,7 +16,7 @@ def run(sim):
 
     # Set plot title and legend
     ax.set_title('Grass Simulation')
-    ax.legend(loc='upper right')
+    # ax.legend(loc='upper right')
 
     # Create text to show information
     text = ax.text(

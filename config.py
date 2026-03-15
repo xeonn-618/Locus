@@ -5,12 +5,14 @@ initial_population_size = 100 # Initial population size of simulation
 initial_energy = 100 # Initial energy of each deer at start of simulation
 vision_radius = 2 # how far deer an interact; 1 for 3x3 grid with deer at center, 2 for 5x5 " " "
 maturity_age = 5 # Age when deer achieves reproductive maturity
+max_eat = 50 # max length of grass a deer can consume per tick
+digestion_efficency = 0.5 # Multiplication factor of how much of grass length is converted into energy
 cost_move = 5 # Energy required to move 1 step
 cost_metabolic = 2 # Energy consumed by metabolic processes each step
 
 
 # -> Genetic Variables
-initial_p = 0.7 # Allelic frequency of dominant allele
+initial_p = 0.225 # Allelic frequency of dominant allele
 
 # Environment Variables
 
@@ -19,9 +21,9 @@ initial_p = 0.7 # Allelic frequency of dominant allele
 # over a very small range (usually grass_growth_max <= 5) results in a flat map of zeros. 
 # To avoid this, choose smaller sigmas and bigger grass growth max, if needed increase grid size.
 
-matrix_size = 500 # size of environment
-sigma = 14 # smoothness of grass distribution; larger = smoother patches; small = finer patches
-grass_growth_max = 10
+matrix_size = 100 # size of environment
+sigma = 5 # smoothness of grass distribution; larger = smoother patches; small = finer patches
+grass_growth_max = 7
 grass_max_length = 2000
 
 # Animation Variables
