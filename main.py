@@ -25,7 +25,7 @@ grass_matrix = (normalized * 100).astype(int)
 MySim = Simulator(config.initial_population_size, grass_matrix, config.initial_p)
 
 if __name__ == '__main__':
-    print(f"| {'Tick':^9} | {'N':^7} | {'p':^7} |")
+    print(f"| {'Tick':^9} | {'N':^7} | {'p':^7} | {"Avg. Energy":^9}")
     print("-" * 33)
     # Run the simulation and animation
     animate.run(MySim)

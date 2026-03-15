@@ -1,11 +1,12 @@
 # Define the parameters of the simulation in this file
 
 # Deer Population Variables
-initial_population_size = 100
-initial_energy = 100
+initial_population_size = 100 # Initial population size of simulation
+initial_energy = 100 # Initial energy of each deer at start of simulation
+vision_radius = 2 # how far deer an interact; 1 for 3x3 grid with deer at center, 2 for 5x5 " " "
 maturity_age = 5 # Age when deer achieves reproductive maturity
-cost_move = 5
-cost_metabolic = 2
+cost_move = 5 # Energy required to move 1 step
+cost_metabolic = 2 # Energy consumed by metabolic processes each step
 
 
 # -> Genetic Variables

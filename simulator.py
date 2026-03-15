@@ -2,14 +2,6 @@ import numpy as np
 from scipy.ndimage import gaussian_filter
 import config
 
-# Random Number Generator
-rng = np.random.default_rng()
-
-# Moves - array of possible positions to move
-moves = np.array([[0,0], [-1,1], [0,1], [1,1],
-                  [-1,0],  [1,0],
-                   [-1,-1], [0,-1], [1,-1] ])
-
 class Simulator():
     def __init__(self, N, grass, p) -> None:
         self.grass = grass # A 2-D matrix
@@ -19,15 +11,30 @@ class Simulator():
         # Allelic frequencies
         self.p, self.q = p, 1-p
 
+        # Random Number Generator
+        self.rng = np.random.default_rng()
+
+        # Generate moves array
+        R = config.vision_radius
+        dx = np.arange(-R, R+1)
+        dy = np.arange(-R, R+1)
+        xx, yy = np.meshgrid(dx, dy)
+        self.moves = np.column_stack((xx.ravel(), yy.ravel()))
+        
+        # Sort the array so [0,0] is first element of array
+        distances = np.abs(self.moves[:, 0]) + np.abs(self.moves[:, 1]) # |x| + |y| ; absolute dist
+        self.moves = self.moves[np.argsort(distances)]
+
+
         # Deer population
         # We keep track of individuals by their array index
-        self.population_coords = rng.integers(0, grass.shape[0], size=(N,2)) # ndarray([[X1, Y1], [X2, Y2]])
+        self.population_coords = self.rng.integers(0, grass.shape[0], size=(N,2)) # ndarray([[X1, Y1], [X2, Y2]])
         self.population_sex = np.random.choice( [0, 1], N) # 0: Female, 1: Male
-        self.population_age = rng.integers(1, 10, size=N) # Assign random ages between 1 to 10
+        self.population_age = self.rng.integers(1, 10, size=N) # Assign random ages between 1 to 10
         self.population_energy = np.full(N, config.initial_energy) # Assign initial energy to each individual
         self.population_isPregnant = np.zeros(N, dtype=bool) # All starting individuals start off not pregnant
         self.population_mateable = (self.population_age >= config.maturity_age) & (~self.population_isPregnant) 
-        self.population_genotype = rng.binomial(n=1, p=p, size=(N,2)) # 0: recessive allele, 1: dominant allele
+        self.population_genotype = self.rng.binomial(n=1, p=p, size=(N,2)) # 0: recessive allele, 1: dominant allele
         self.population_germ_genotype = np.copy(self.population_genotype) # Initialize the germ genotype to be same as parent in beginning
 
         # Occupancy grid
@@ -41,7 +48,7 @@ class Simulator():
     # Grow the grass by a random range
     def grow_grass(self):
         # Create a random noise growth map
-        noise_map = rng.integers(low=0, high=config.grass_growth_max, size=self.grass.shape)
+        noise_map = self.rng.integers(low=0, high=config.grass_growth_max, size=self.grass.shape)
 
         # Smooth the noise
         growth_map = gaussian_filter(noise_map, sigma=config.sigma//2) # Smaller sigma to localize growth in smaller patches
@@ -58,7 +65,7 @@ class Simulator():
     def deer_move(self):
 
         # Create potential moves array for each deer via np broadcasting (N, 9, 2)
-        potential_moves = self.population_coords[:, np.newaxis, :] + moves
+        potential_moves = self.population_coords[:, np.newaxis, :] + self.moves
 
         # Set limits to prevent going out of bounds
         max_x = self.grass.shape[0] - 1
@@ -78,18 +85,19 @@ class Simulator():
 
         # Find best coordinate to move for each N
         best_coords = potential_moves[np.arange(self.N), best_moves_indicies]
-
-        # Find individuals who are going to move from their current position
-        moved_deer = (self.population_coords != best_coords).any(axis=1)
+        
+        # Find distance moved by each deer
+        dist_moved = (np.abs(best_coords[:, 0] - self.population_coords[:, 0]) + 
+                      np.abs(best_coords[:, 1] - self.population_coords[:, 1]))
 
         # Subtract the energy cost of moving from their energy pool
-        self.population_energy[moved_deer] -= config.cost_move
+        self.population_energy -= (dist_moved * config.cost_move)
 
         # Move each deer to its new best coord
         self.population_coords = best_coords
 
     def run_tick(self):
-        print(f"| {self.tick:^9} | {self.N:^7} | {self.p:^7} |")
+        print(f"| {self.tick:^9} | {self.N:^7} | {self.p:^7} | {self.population_energy.mean():^9}")
 
         # Grow the grass
         self.grow_grass()
