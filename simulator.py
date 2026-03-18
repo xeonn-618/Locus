@@ -31,7 +31,7 @@ class Simulator():
         # We keep track of individuals by their array index
         self.population_coords = self.rng.integers(0, grass.shape[0], size=(N,2)) # ndarray([[X1, Y1], [X2, Y2]])
         self.population_sex = np.random.choice( [0, 1], N) # 0: Female, 1: Male
-        self.population_age = self.rng.integers(1, 10, size=(N,)) # Assign random ages between 1 to 10
+        self.population_age = self.rng.integers(1, 9*config.year, size=(N,)) # Assign random ages between 1 to 10
         self.population_energy = np.full(N, config.initial_energy) # Assign initial energy to each individual
         self.population_isPregnant = np.zeros(N, dtype=bool) # All starting individuals start off not pregnant
         self.population_mateable = (self.population_age >= config.maturity_age) & (~self.population_isPregnant) & (self.population_energy > config.cost_mate)
@@ -218,7 +218,7 @@ class Simulator():
     def deer_die(self):
         
         # Select survivors/alive deer
-        survivor_mask = self.population_energy > 0
+        survivor_mask = (self.population_energy > 0) & (self.population_age < config.life_span) 
 
         # Update each array to inlcude only survivors
         self.population_energy = self.population_energy[survivor_mask]
@@ -237,7 +237,7 @@ class Simulator():
 
     def run_tick(self):
         if self.N > 0:
-            print(f"| {self.tick:^9} | {self.N:^7} | {self.p:^7} | {self.population_energy.mean():^11.1f} | {self.grass.mean():^5.1f}")
+            print(f"| {self.tick:^9} | {self.N:^7} | {self.p:^7} | {self.population_energy.mean():^11.1f} | {self.grass.mean():^9.1f} | {self.population_age.mean():^9.2f} |")
         else:
             print(f"| {self.tick:^9} | {self.N:^7} | {self.p:^7} | {0:^11.1f} | {self.grass.mean():^5.1f}")
 
@@ -264,6 +264,6 @@ class Simulator():
 
         # Recalculate parameters
         self.population_mateable = (self.population_age >= config.maturity_age) & (~self.population_isPregnant) & (self.population_energy > config.cost_mate)
-        
+
         # Update tick
         self.tick += 1
