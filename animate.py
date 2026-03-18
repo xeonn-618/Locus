@@ -5,27 +5,53 @@ import config
 
 def run(sim):
 
-    # Create fig, ax objects
-    fig, ax = plt.subplots(figsize=(6,6))
+    # define the grid layout
+    layout = [
+        ['map', 'freq'],
+        ['map', 'pop']
+    ]
 
+    # Create fig, ax objects
+    fig, ax = plt.subplot_mosaic(layout, figsize=(12, 6), width_ratios=(1,1))
+
+    # Setup map object
     # Create a grass heatmap
-    grass_map = ax.imshow(sim.grass, cmap='Greens', interpolation='nearest', alpha=0.5)
+    grass_map = ax['map'].imshow(sim.grass, cmap='Greens', interpolation='nearest', alpha=0.5)
 
     # Create a population scatter map
-    population_map = ax.scatter(sim.population_coords[:, 0], sim.population_coords[:, 1], alpha=1, marker='o')
+    population_map = ax['map'].scatter(sim.population_coords[:, 0], sim.population_coords[:, 1], alpha=1, marker='o', c='red')
 
     # Set plot title and legend
-    ax.set_title('Grass & Deer Simulation')
+    ax['map'].set_title('Grass & Deer Simulation')
     # ax.legend(loc='upper right')
 
     # Create text to show information
-    text = ax.text(
+    text = ax['map'].text(
         0.03, 0.97, f'Tick: {sim.tick}\nAvg Food: {np.mean(sim.grass)}\nN: {sim.N}',
-        transform=ax.transAxes, # Relative to axes
+        transform=ax['map'].transAxes, # Relative to axes
         fontsize=10,
         verticalalignment='top',
         fontfamily='monospace'
     )
+
+    # Setup frequency plot object
+    ax['freq'].set_title('Allelic Frequencies')
+    ax['freq'].set_ylim(0,1)
+    line_p, = ax['freq'].plot([], [], label='p (Dominant)', color='blue', lw=2)
+    line_q, = ax['freq'].plot([], [], label='q (Recessive))', color='red', lw=2)
+    ax['freq'].legend(loc='upper right')
+
+    # Setup population density plot
+    ax['pop'].set_title('Population Density (N)')
+    line_N, = ax['pop'].plot([], [], color='green', lw=2)
+
+    fig.tight_layout() 
+
+    # Data Storage
+    history_ticks = []
+    history_p = []
+    history_q = []
+    history_N = []
 
     # Update the tick
     def update(frame):
@@ -46,8 +72,41 @@ def run(sim):
         # Update population map
         population_map.set_offsets(sim.population_coords)
 
+        # Calculate current sim stats
+        present_N = len(sim.population_coords)
+
+        # If all die, prevent div by zero
+        if present_N > 0:
+            total_alleles = 2 * present_N
+            current_p = sim.population_genotype.sum() / total_alleles
+            current_q = 1 - current_p
+        else:
+            current_p = 0
+            current_q = 0
+
+        # Update history lists
+        history_N.append(present_N)
+        history_p.append(current_p)
+        history_q.append(current_q)
+        history_ticks.append(sim.tick)
+
+        # Update line plots
+        line_N.set_data(history_ticks, history_N)
+        line_p.set_data(history_ticks, history_p)
+        line_q.set_data(history_ticks, history_q)
+
+        # Slide the axis
+        window_start = max(0, sim.tick - 100)
+        window_end = max(10, sim.tick + 5)
+        ax['freq'].set_xlim(window_start, window_end)
+        ax['pop'].set_xlim(window_start, window_end)
+
+        # Scale population Y axis
+        if present_N > 0:
+            ax['pop'].set_ylim(0, max(history_N) + 10)
+
         # Return the axes objects
-        return [grass_map, text, population_map]
+        return [grass_map, text, population_map, line_N, line_p, line_q]
 
     # Create the animation object
     ani = animation.FuncAnimation(fig,

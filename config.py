@@ -1,7 +1,7 @@
 # Define the parameters of the simulation in this file
 
 # Deer Population Variables
-initial_population_size = 50 # Initial population size of simulation
+initial_population_size = 100 # Initial population size of simulation
 initial_energy = 400 # Initial energy of each deer at start of simulation
 vision_radius = 2 # how far deer an interact; 1 for 3x3 grid with deer at center, 2 for 5x5 " " "
 maturity_age = 5 # Age when deer achieves reproductive maturity
@@ -22,7 +22,7 @@ initial_p = 0.225 # Allelic frequency of dominant allele
 # To avoid this, choose smaller sigmas and bigger grass growth max, if needed increase grid size.
 
 matrix_size = 100 # size of environment
-sigma = 4 # smoothness of grass distribution; larger = smoother patches; small = finer patches
+sigma = 2 # smoothness of grass distribution; larger = smoother patches; small = finer patches
 grass_growth_max = 10
 grass_max_length = 2000
 

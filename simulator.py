@@ -102,6 +102,9 @@ class Simulator():
         # Subtract the energy cost of moving from their energy pool
         self.population_energy -= (dist_moved * config.cost_move)
 
+        # Subtract the metabolic cost from energy pool
+        self.population_energy -= config.cost_metabolic
+
         # Move each deer to its new best coord
         self.population_coords = best_coords
 
@@ -143,12 +146,15 @@ class Simulator():
 
 
     def run_tick(self):
-        print(f"| {self.tick:^9} | {self.N:^7} | {self.p:^7} | {self.population_energy.mean():^9} | {self.grass.mean():^5}")
+        if self.N > 0:
+            print(f"| {self.tick:^9} | {self.N:^7} | {self.p:^7} | {self.population_energy.mean():^11.1f} | {self.grass.mean():^5.1f}")
+        else:
+            print(f"| {self.tick:^9} | {self.N:^7} | {self.p:^7} | {0:^11.1f} | {self.grass.mean():^5.1f}")
 
         # Grow the grass
         self.grow_grass()
 
-        # Move the deer
+        # Move the deer + metabolic cost
         self.deer_move()
 
         # Deer eats gras
