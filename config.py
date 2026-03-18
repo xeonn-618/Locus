@@ -1,11 +1,11 @@
 # Define the parameters of the simulation in this file
 
 # Deer Population Variables
-initial_population_size = 100 # Initial population size of simulation
+initial_population_size = 250 # Initial population size of simulation
 initial_energy = 400 # Initial energy of each deer at start of simulation
 vision_radius = 2 # how far deer an interact; 1 for 3x3 grid with deer at center, 2 for 5x5 " " "
 mating_dist = 5 # eucledian-distance required for two deers to breed
-maturity_age = 5 # Age when deer achieves reproductive maturity
+maturity_age = 50 # Age in ticks when deer achieves reproductive maturity
 max_eat = 250 # max length of grass a deer can consume per tick
 digestion_efficency = 0.5 # Multiplication factor of how much of grass length is converted into energy
 cost_move = 25 # Energy required to move 1 step
@@ -30,4 +30,4 @@ grass_growth_max = 10
 grass_max_length = 2000
 
 # Animation Variables
-tick_time = 100 # Time per tick in miliseconds
+tick_time = 25 # Time per tick in miliseconds

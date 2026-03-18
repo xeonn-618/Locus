@@ -39,7 +39,7 @@ def run(sim):
     ax['freq'].set_ylim(0,1)
     line_p, = ax['freq'].plot([], [], label='p (Dominant)', color='blue', lw=2)
     line_q, = ax['freq'].plot([], [], label='q (Recessive))', color='red', lw=2)
-    ax['freq'].legend(loc='upper right')
+    ax['freq'].legend(loc='upper left')
 
     # Setup population density plot
     ax['pop'].set_title('Population Density (N)')
@@ -112,7 +112,7 @@ def run(sim):
     ani = animation.FuncAnimation(fig,
                                   update,
                                   interval=config.tick_time,
-                                  blit=True,
+                                  blit=False,
                                   cache_frame_data=False
                                   )
     

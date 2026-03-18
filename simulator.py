@@ -38,6 +38,7 @@ class Simulator():
         self.population_genotype = self.rng.binomial(n=1, p=p, size=(N,2)) # 0: recessive allele, 1: dominant allele
         self.population_germ_genotype = np.copy(self.population_genotype) # Initialize the germ genotype to be same as parent in beginning
         self.population_embryo_dict = np.zeros(shape=(N,3)) # N rows; [ageToBirth, allele1, allele2]
+        
         # Occupancy grid
         self.occupancy_grid = np.zeros(grass.shape, dtype=bool)
 
@@ -126,6 +127,9 @@ class Simulator():
 
         # Set negative grass lengths to zero
         self.grass[x_coords, y_coords] = np.clip(self.grass[x_coords, y_coords], 0, None)
+
+    def deer_age(self):
+        self.population_age += 1
 
     def deer_breed(self):
         # Use a KDTree data structure to efficiently search for the nearest deer
@@ -255,5 +259,11 @@ class Simulator():
         # Deer die
         self.deer_die()
 
+        # Age the deer
+        self.deer_age()
+
+        # Recalculate parameters
+        self.population_mateable = (self.population_age >= config.maturity_age) & (~self.population_isPregnant) & (self.population_energy > config.cost_mate)
+        
         # Update tick
         self.tick += 1
