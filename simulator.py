@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.ndimage import gaussian_filter
+from scipy.spatial import KDTree
 import config
 
 class Simulator():
@@ -33,10 +34,10 @@ class Simulator():
         self.population_age = self.rng.integers(1, 10, size=(N,)) # Assign random ages between 1 to 10
         self.population_energy = np.full(N, config.initial_energy) # Assign initial energy to each individual
         self.population_isPregnant = np.zeros(N, dtype=bool) # All starting individuals start off not pregnant
-        self.population_mateable = (self.population_age >= config.maturity_age) & (~self.population_isPregnant) 
+        self.population_mateable = (self.population_age >= config.maturity_age) & (~self.population_isPregnant) & (self.population_energy > config.cost_mate)
         self.population_genotype = self.rng.binomial(n=1, p=p, size=(N,2)) # 0: recessive allele, 1: dominant allele
         self.population_germ_genotype = np.copy(self.population_genotype) # Initialize the germ genotype to be same as parent in beginning
-
+        self.population_embryo_dict = np.zeros(shape=(N,3)) # N rows; [ageToBirth, allele1, allele2]
         # Occupancy grid
         self.occupancy_grid = np.zeros(grass.shape, dtype=bool)
 
@@ -126,6 +127,90 @@ class Simulator():
         # Set negative grass lengths to zero
         self.grass[x_coords, y_coords] = np.clip(self.grass[x_coords, y_coords], 0, None)
 
+    def deer_breed(self):
+        # Use a KDTree data structure to efficiently search for the nearest deer
+        # Create the tree object
+        tree = KDTree(data=self.population_coords)
+        
+        # Query the tree to get the nearest neighbours of each deer
+        # Set a limit to see if deers are within mating range
+        nearest_neighbours = tree.query_pairs(r=config.mating_dist)
+        
+        # Iterate over each pair
+        seen_deer_pairs = set()
+
+
+        self.population_mateable = (self.population_age >= config.maturity_age) & (~self.population_isPregnant) & (self.population_energy > config.cost_mate)
+
+        for d1, d2 in nearest_neighbours:
+            if (d1, d2) not in seen_deer_pairs:
+                # Check if they are valid mates
+                # Check sex
+                if self.population_sex[d1] == 0 and self.population_sex[d2] == 0: # If both female
+                    seen_deer_pairs.add((d1, d2))
+                    continue
+                if self.population_sex[d1] == 1 and self.population_sex[d2] == 1: # If both male
+                    seen_deer_pairs.add((d1, d2))
+                    continue
+
+                if self.population_sex[d1] == 0:
+                    male = d2
+                    female = d1
+                else:
+                    male = d1
+                    female = d2
+
+                # Check if mateable and add gestation period counter to pregnant female
+                if self.population_mateable[male] and self.population_mateable[female]:
+                    self.population_mateable[female] = False
+                    self.population_isPregnant[female] = True
+
+                    # Initialize pregnancy inside female
+                    # Randomly select alleles
+                    allele1 = np.random.choice(self.population_germ_genotype[female])
+                    allele2 = np.random.choice(self.population_germ_genotype[male])
+                    self.population_embryo_dict[female] = [config.gestation_period, allele1, allele2]
+    
+    def deer_spawn(self):
+        # Spawn deer whos gestation period has reached value of 1
+        # Subtract value; level minimum to zero
+
+        # Subtract gestation timers from all deers
+        self.population_embryo_dict[:, 0] -= 1
+
+        # Dont let timers go below zero
+        self.population_embryo_dict[:, 0] = np.clip(self.population_embryo_dict[:, 0],0, None )
+
+        # Mask of those pregnant deers who are ready to give birth
+        newbirth_mask = self.population_embryo_dict[:, 0] == 1
+
+        # Number of progeny being born
+        count_births = sum(newbirth_mask)
+
+        # Reset pregnancy and mateable status of mother
+        self.population_isPregnant[newbirth_mask] = False
+
+        # Give birth at position of female deer
+        positions = self.population_coords[newbirth_mask]
+        self.population_coords = np.concatenate((self.population_coords, positions))
+        self.population_energy = np.concatenate((self.population_energy, np.full(shape=(count_births), fill_value=config.initial_energy)))
+        self.population_age = np.concatenate((self.population_age, np.zeros(shape=count_births)))
+        self.population_genotype = np.concatenate((self.population_genotype, self.population_embryo_dict[newbirth_mask][:,1:]))
+        self.population_germ_genotype = np.copy(self.population_genotype)
+        self.population_isPregnant = np.concatenate((self.population_isPregnant, np.full(shape=count_births, fill_value=False)))
+        self.population_mateable = np.concatenate((self.population_mateable, np.full(shape=count_births, fill_value=False)))
+        self.population_sex = np.concatenate((self.population_sex, np.random.choice( [0, 1], count_births)))
+        self.population_embryo_dict = np.concatenate((self.population_embryo_dict, np.zeros(shape=(count_births, 3))))
+
+        
+        self.population_mateable = (self.population_age >= config.maturity_age) & (~self.population_isPregnant) & (self.population_energy > config.cost_mate)
+
+        # Re-calculate population size
+        self.N = len(self.population_coords)
+        
+        
+
+
     def deer_die(self):
         
         # Select survivors/alive deer
@@ -140,6 +225,7 @@ class Simulator():
         self.population_isPregnant = self.population_isPregnant[survivor_mask]
         self.population_mateable = self.population_mateable[survivor_mask]
         self.population_sex = self.population_sex[survivor_mask]
+        self.population_embryo_dict = self.population_embryo_dict[survivor_mask]
 
         # Update population varaibles
         self.N = len(self.population_energy)
@@ -157,8 +243,14 @@ class Simulator():
         # Move the deer + metabolic cost
         self.deer_move()
 
-        # Deer eats gras
+        # Deer eats grass
         self.deer_eat()
+
+        # Deers breed
+        self.deer_breed()
+
+        # Deer Spawn
+        self.deer_spawn()
 
         # Deer die
         self.deer_die()

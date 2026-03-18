@@ -12,7 +12,7 @@ def run(sim):
     ]
 
     # Create fig, ax objects
-    fig, ax = plt.subplot_mosaic(layout, figsize=(12, 6), width_ratios=(1,1))
+    fig, ax = plt.subplot_mosaic(layout, figsize=(12, 6), width_ratios=(1,1)) #type: ignore
 
     # Setup map object
     # Create a grass heatmap
