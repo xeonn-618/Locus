@@ -1,7 +1,10 @@
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+from matplotlib.patches import Patch
 import numpy as np
 import config
+
+plt.style.use('ggplot')
 
 def run(sim):
 
@@ -18,12 +21,27 @@ def run(sim):
     # Create a grass heatmap
     grass_map = ax['map'].imshow(sim.grass, cmap='Greens', interpolation='nearest', alpha=0.5)
 
+    # Retrieve genotypes of individuals
+    genotype_sums = np.sum(sim.population_genotype, axis=1)
+
+    # Create a color palette for the different genotypes
+    # aa = red; Aa = Purple; AA = Blue
+    palette = np.array(['red', 'yellow', 'blue'])
+
+    # Assign deer indicies colors
+    deer_colors = palette[genotype_sums]
+
     # Create a population scatter map
-    population_map = ax['map'].scatter(sim.population_coords[:, 0], sim.population_coords[:, 1], alpha=1, marker='o', c='red')
+    population_map = ax['map'].scatter(sim.population_coords[:, 0], sim.population_coords[:, 1], alpha=1, marker='o',
+                                       c=deer_colors)
 
     # Set plot title and legend
     ax['map'].set_title('Grass & Deer Simulation')
-    # ax.legend(loc='upper right')
+    AA_patch = Patch(color=palette[2], label='AA')
+    Aa_patch = Patch(color=palette[1], label='Aa')
+    aa_patch = Patch(color=palette[0], label='aa')
+    ax['map'].legend(handles=[AA_patch, Aa_patch, aa_patch], loc='upper right')
+
 
     # Create text to show information
     text = ax['map'].text(
@@ -71,6 +89,11 @@ def run(sim):
 
         # Update population map
         population_map.set_offsets(sim.population_coords)
+
+        # Update deer colors
+        genotype_sums = np.sum(sim.population_genotype, axis=1).astype(int)
+        new_deer_colors = palette[genotype_sums]
+        population_map.set_facecolors(new_deer_colors)
 
         # Calculate current sim stats
         present_N = len(sim.population_coords)
