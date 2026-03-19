@@ -41,24 +41,31 @@ def run(sim):
     AA_patch = Patch(color=palette[2], label='AA')
     Aa_patch = Patch(color=palette[1], label='Aa')
     aa_patch = Patch(color=palette[0], label='aa')
-    ax['map'].legend(handles=[AA_patch, Aa_patch, aa_patch], loc='upper right')
+    ax['map'].legend(handles=[AA_patch, Aa_patch, aa_patch], loc='upper right',
+                     frameon=True, facecolor='#1e1e1e', edgecolor='none', framealpha=0.75)
 
 
     # Create text to show information
     text = ax['map'].text(
-        0.03, 0.97, f'Tick: {sim.tick}\nAvg Food: {np.mean(sim.grass)}\nN: {sim.N}',
+        0.03, 0.97, f'Tick: {sim.tick}\nAvg Food: {np.mean(sim.grass):.1f}\nN: {sim.N}',
         transform=ax['map'].transAxes, # Relative to axes
         fontsize=10,
         verticalalignment='top',
-        fontfamily='monospace'
+        fontfamily='monospace',
+        bbox=dict(
+            boxstyle='round,pad=0.5',
+            facecolor='#1e1e1e',
+            edgecolor=None,
+            alpha=0.75
+            )
     )
 
     # Setup frequency plot object
     ax['freq'].set_title('Allelic Frequencies')
     ax['freq'].set_ylim(0,1)
-    line_p, = ax['freq'].plot([], [], label='p (Dominant)', color='blue', lw=2)
-    line_q, = ax['freq'].plot([], [], label='q (Recessive))', color='red', lw=2)
-    ax['freq'].legend(loc='upper left')
+    line_p, = ax['freq'].plot([], [], label=f'p (Dominant): {sim.p:.2f}', color='blue', lw=2)
+    line_q, = ax['freq'].plot([], [], label=f'q (Recessive) {1-sim.p:.2f}:', color='red', lw=2)
+    freq_legend = ax['freq'].legend(loc='upper left', frameon=True, facecolor='#1e1e1e', edgecolor='none', framealpha=0.75)
 
     # Setup population density plot
     ax['pop'].set_title('Population Density (N)')
@@ -79,7 +86,7 @@ def run(sim):
         sim.run_tick()
 
         # Update the text
-        status_text = f"Tick: {sim.tick}\nAvg Food: {np.mean(sim.grass)}\nN: {sim.N}"
+        status_text = f"Tick: {sim.tick}\nAvg Food: {np.mean(sim.grass):.1f}\nN: {sim.N}"
         text.set_text(status_text)
 
         # Update grass heatmap
@@ -118,6 +125,10 @@ def run(sim):
         line_N.set_data(history_ticks, history_N)
         line_p.set_data(history_ticks, history_p)
         line_q.set_data(history_ticks, history_q)
+
+        # Update freq axis legends
+        freq_legend.get_texts()[0].set_text(f'p (Dominant): {sim.p:.2f}')
+        freq_legend.get_texts()[1].set_text(f'q (Recessive): {1-sim.p:.2f}')
 
         # Slide the axis
         window_start = max(0, sim.tick - 100)
