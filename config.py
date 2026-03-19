@@ -18,8 +18,15 @@ cost_mate = 100 # Breeding energy cost
 exploration_rate = 0.1 # Probability a deer ignores optimal path and wanders randomly. Avoids crowding.
 gestation_period = int(0.7*year) # Gestation period of pregnancy in ticks
 
-# -> Genetic Variables
-initial_p = 0.8 # Allelic frequency of dominant allele
+# ---------|| Genetic Variables ||--------------------
+
+# -- Allelic Frequency --
+initial_p = 0.5
+
+# ---- Fitness -----
+fitness_AA = 0.90
+fitness_Aa = 0.55
+fitness_aa = 0.20
 
 # Environment Variables
 

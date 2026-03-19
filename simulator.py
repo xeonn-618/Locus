@@ -212,6 +212,41 @@ class Simulator():
         # Re-calculate population size
         self.N = len(self.population_coords)
         
+    def natural_select(self):
+
+        # Select only for deer who have turned adults this tick
+        birthday_deers = self.population_age == config.maturity_age
+        immune_deer = self.population_age != config.maturity_age
+
+        # Create masks for different genotypes
+        AA_mask = (np.sum(self.population_genotype, axis=1) == 2) & (birthday_deers)
+        Aa_mask = (np.sum(self.population_genotype, axis=1) == 1) & (birthday_deers)
+        aa_mask = (np.sum(self.population_genotype, axis=1) == 0) & (birthday_deers)
+
+        # Generate random uniform 0-1 arrays to filter survivors
+        rand = np.random.uniform(size=len(self.population_genotype))
+
+        # Create survivor masks for each group
+        AA_survivor_mask = (rand <= config.fitness_AA) & (AA_mask)
+        Aa_survivor_mask = (rand <= config.fitness_Aa) & (Aa_mask)
+        aa_survivor_mask = (rand <= config.fitness_aa) & (aa_mask)
+
+        # Create a master survivor mask; Add immune_deers to prevent population wipeout
+        master_survivor_mask = AA_survivor_mask | Aa_survivor_mask | aa_survivor_mask | immune_deer
+
+        # Update each array to inlcude only survivors
+        self.population_energy = self.population_energy[master_survivor_mask]
+        self.population_age = self.population_age[master_survivor_mask]
+        self.population_coords = self.population_coords[master_survivor_mask]
+        self.population_genotype = self.population_genotype[master_survivor_mask]
+        self.population_germ_genotype = self.population_germ_genotype[master_survivor_mask]
+        self.population_isPregnant = self.population_isPregnant[master_survivor_mask]
+        self.population_mateable = self.population_mateable[master_survivor_mask]
+        self.population_sex = self.population_sex[master_survivor_mask]
+        self.population_embryo_dict = self.population_embryo_dict[master_survivor_mask]
+
+        # Update population varaibles
+        self.N = len(self.population_energy)
         
 
 
@@ -243,6 +278,9 @@ class Simulator():
 
         # Grow the grass
         self.grow_grass()
+
+        # Nautrally select fit deers
+        self.natural_select()
 
         # Move the deer + metabolic cost
         self.deer_move()
