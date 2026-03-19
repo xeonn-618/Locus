@@ -272,7 +272,7 @@ class Simulator():
 
     def run_tick(self):
         if self.N > 0:
-            print(f"| {self.tick:^9} | {self.N:^7} | {self.p:^7} | {self.population_energy.mean():^11.1f} | {self.grass.mean():^9.1f} | {self.population_age.mean():^9.2f} |")
+            print(f"| {self.tick:^9} | {self.N:^7} | {self.p:^7.3f} | {self.population_energy.mean():^11.1f} | {self.grass.mean():^9.1f} | {self.population_age.mean():^9.2f} |")
         else:
             print(f"| {self.tick:^9} | {self.N:^7} | {self.p:^7} | {0:^11.1f} | {self.grass.mean():^5.1f}")
 
@@ -303,5 +303,9 @@ class Simulator():
         # Recalculate parameters
         self.population_mateable = (self.population_age >= config.maturity_age) & (~self.population_isPregnant) & (self.population_energy > config.cost_mate)
 
+        # Update p value based on germ genotype
+        self.p = self.population_germ_genotype.mean()
+        self.q = 1 - self.p
+        
         # Update tick
         self.tick += 1
