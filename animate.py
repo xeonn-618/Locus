@@ -1,10 +1,11 @@
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from matplotlib.patches import Patch
+import mplcyberpunk
 import numpy as np
 import config
 
-plt.style.use('ggplot')
+plt.style.use('cyberpunk')
 
 def run(sim):
 
@@ -19,21 +20,21 @@ def run(sim):
 
     # Setup map object
     # Create a grass heatmap
-    grass_map = ax['map'].imshow(sim.grass, cmap='Greens', interpolation='nearest', alpha=0.5)
+    grass_map = ax['map'].imshow(sim.grass, cmap='Greens', interpolation='nearest', alpha=0.25)
 
     # Retrieve genotypes of individuals
     genotype_sums = np.sum(sim.population_genotype, axis=1)
 
     # Create a color palette for the different genotypes
     # aa = red; Aa = Purple; AA = Blue
-    palette = np.array(['red', 'yellow', 'blue'])
+    palette = np.array(['#ff007f', '#b200ff', '#00ffff'])
 
     # Assign deer indicies colors
     deer_colors = palette[genotype_sums]
 
     # Create a population scatter map
     population_map = ax['map'].scatter(sim.population_coords[:, 0], sim.population_coords[:, 1], alpha=1, marker='o',
-                                       c=deer_colors)
+                                       c=deer_colors, edgecolors='black', linewidth=0.8, s=55)
 
     # Set plot title and legend
     ax['map'].set_title('Grass & Deer Simulation')
