@@ -25,8 +25,8 @@ initial_p = 0.5
 
 # ---- Fitness -----
 fitness_AA = 0.90
-fitness_Aa = 0.55
-fitness_aa = 0.20
+fitness_Aa = 0.90
+fitness_aa = 0.50
 
 # Environment Variables
 

@@ -69,7 +69,15 @@ def run(sim):
 
     # Setup population density plot
     ax['pop'].set_title('Population Density (N)')
-    line_N, = ax['pop'].plot([], [], color='green', lw=2)
+    line_N, = ax['pop'].plot([], [], color='green', lw=2, label=f'N: {0}')
+
+    # Set up genotype plot lines
+    line_AA, = ax['pop'].plot([], [], color=palette[2], lw=2, label=f'AA: {0}')
+    line_Aa, = ax['pop'].plot([], [], color=palette[1], lw=2, label=f'Aa: {0}')
+    line_aa, = ax['pop'].plot([], [], color=palette[0], lw=2, label=f'aa: {0}')
+
+    # Set legend for population plot
+    pop_legend = ax['pop'].legend(loc='upper left', frameon=True, facecolor='#1e1e1e', edgecolor='none', framealpha=0.75)
 
     fig.tight_layout() 
 
@@ -78,6 +86,9 @@ def run(sim):
     history_p = []
     history_q = []
     history_N = []
+    history_AA = []
+    history_Aa = []
+    history_aa = []
 
     # Update the tick
     def update(frame):
@@ -115,20 +126,37 @@ def run(sim):
             current_p = 0
             current_q = 0
 
+        # Find genotype counts
+        AA_count = sum(np.sum(sim.population_genotype, axis=1)==2)
+        Aa_count = sum(np.sum(sim.population_genotype, axis=1)==1)
+        aa_count = sum(np.sum(sim.population_genotype, axis=1)==0)
+
         # Update history lists
         history_N.append(present_N)
         history_p.append(current_p)
         history_q.append(current_q)
+        history_AA.append(AA_count)
+        history_Aa.append(Aa_count)
+        history_aa.append(aa_count)
         history_ticks.append(sim.tick)
 
         # Update line plots
         line_N.set_data(history_ticks, history_N)
         line_p.set_data(history_ticks, history_p)
         line_q.set_data(history_ticks, history_q)
+        line_AA.set_data(history_ticks, history_AA)
+        line_Aa.set_data(history_ticks, history_Aa)
+        line_aa.set_data(history_ticks, history_aa)
 
         # Update freq axis legends
         freq_legend.get_texts()[0].set_text(f'p (Dominant): {sim.p:.2f}')
         freq_legend.get_texts()[1].set_text(f'q (Recessive): {1-sim.p:.2f}')
+        
+        # Update pop axis legends
+        pop_legend.get_texts()[0].set_text(f"N: {len(sim.population_coords)}")
+        pop_legend.get_texts()[1].set_text(f"AA: {AA_count}")
+        pop_legend.get_texts()[2].set_text(f"Aa: {Aa_count}")
+        pop_legend.get_texts()[3].set_text(f"aa: {aa_count}")
 
         # Slide the axis
         window_start = max(0, sim.tick - 100)
