@@ -65,7 +65,6 @@ class Simulator():
         self.grass = np.clip(self.grass, 0, config.grass_max_length)
 
     def deer_move(self):
-
         # Create potential moves array for each deer via np broadcasting (N, 9, 2)
         potential_moves = self.population_coords[:, np.newaxis, :] + self.moves
 

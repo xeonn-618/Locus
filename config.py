@@ -24,9 +24,9 @@ gestation_period = int(0.7*year) # Gestation period of pregnancy in ticks
 initial_p = 0.5
 
 # ---- Fitness -----
-fitness_AA = 0.90
-fitness_Aa = 0.90
-fitness_aa = 0.50
+fitness_AA = 1
+fitness_Aa = 1
+fitness_aa = 0.5
 
 # Environment Variables
 
@@ -41,4 +41,4 @@ grass_growth_max = 10
 grass_max_length = 2000
 
 # Animation Variables
-tick_time = 25 # Time per tick in miliseconds
+tick_time = 1 # Time per tick in miliseconds
