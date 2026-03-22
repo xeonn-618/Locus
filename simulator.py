@@ -170,8 +170,17 @@ class Simulator():
 
                     # Initialize pregnancy inside female
                     # Randomly select alleles
-                    allele1 = np.random.choice(self.population_germ_genotype[female])
-                    allele2 = np.random.choice(self.population_germ_genotype[male])
+                    allele1 = int(np.random.choice(self.population_germ_genotype[female]))
+                    allele2 = int(np.random.choice(self.population_germ_genotype[male]))
+
+                    # Copy Error Mutations
+                    mutate_mom = int(np.random.uniform() <= config.copy_error_rate)
+                    mutate_dad = int(np.random.uniform() <= config.copy_error_rate)
+
+                    # Flip the allele if mutate state is True
+                    allele1 ^= mutate_mom
+                    allele2 ^= mutate_dad
+
                     self.population_embryo_dict[female] = [config.gestation_period, allele1, allele2]
     
     def deer_spawn(self):

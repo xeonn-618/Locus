@@ -21,12 +21,15 @@ gestation_period = int(0.7*year) # Gestation period of pregnancy in ticks
 # ---------|| Genetic Variables ||--------------------
 
 # -- Allelic Frequency --
-initial_p = 0.5
+initial_p = 0.7
 
 # ---- Fitness -----
 fitness_AA = 1
 fitness_Aa = 1
-fitness_aa = 0.5
+fitness_aa = 1
+
+# ---- Mutation ----
+copy_error_rate = 0.01
 
 # Environment Variables
 
