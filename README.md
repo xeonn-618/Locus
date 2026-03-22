@@ -82,6 +82,8 @@ All simulation parameters are set in `config.py`. Edit the values there to chang
 | `fitness_Aa` | `0.90` | Fitness of Aa type individual |
 | `fitness_aa` | `0.50` | Fitness of aa type individual|
 | `copy_error_rate` | `0.01` | Probability that allele mutates and flips during gamete formation |
+| `germ_mutation_rate` | `0.01` | Chance of mutation of germ cell's one allele randomly|
+| `somatic_mutation_rate` | `0.01` | Chance of mutation of somatic cell's one allele randomly |
 
 ### 🌿 Environment
 

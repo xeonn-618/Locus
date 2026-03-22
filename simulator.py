@@ -37,7 +37,7 @@ class Simulator():
         self.population_mateable = (self.population_age >= config.maturity_age) & (~self.population_isPregnant) & (self.population_energy > config.cost_mate)
         self.population_genotype = self.rng.binomial(n=1, p=p, size=(N,2)) # 0: recessive allele, 1: dominant allele
         self.population_germ_genotype = np.copy(self.population_genotype) # Initialize the germ genotype to be same as parent in beginning
-        self.population_embryo_dict = np.zeros(shape=(N,3)) # N rows; [ageToBirth, allele1, allele2]
+        self.population_embryo_dict = np.zeros(shape=(N,3), dtype=int) # N rows; [ageToBirth, allele1, allele2]
         
         # Occupancy grid
         self.occupancy_grid = np.zeros(grass.shape, dtype=bool)
@@ -207,7 +207,7 @@ class Simulator():
         self.population_coords = np.concatenate((self.population_coords, positions))
         self.population_energy = np.concatenate((self.population_energy, np.full(shape=(count_births), fill_value=config.initial_energy)))
         self.population_age = np.concatenate((self.population_age, np.zeros(shape=count_births)))
-        self.population_genotype = np.concatenate((self.population_genotype, self.population_embryo_dict[newbirth_mask][:,1:]))
+        self.population_genotype = np.concatenate((self.population_genotype, (self.population_embryo_dict[newbirth_mask][:,1:]).astype(int)), dtype=int)
         self.population_germ_genotype = np.copy(self.population_genotype)
         self.population_isPregnant = np.concatenate((self.population_isPregnant, np.full(shape=count_births, fill_value=False)))
         self.population_mateable = np.concatenate((self.population_mateable, np.full(shape=count_births, fill_value=False)))
@@ -256,6 +256,23 @@ class Simulator():
         # Update population varaibles
         self.N = len(self.population_energy)
         
+    def env_mutation(self):
+        
+        # Generate a random uniform distribution to create a mutated mask
+        somatic_mutation_mask = np.random.uniform(size=(self.N)) <= config.somatic_mutation_rate
+        germ_mutation_mask = np.random.uniform(size=(self.N)) <= config.germ_mutation_rate
+
+        # Get the indicies of the row/deer which mutated
+        somatic_indicies = np.where(somatic_mutation_mask)[0]
+        germ_indicies = np.where(germ_mutation_mask)[0]
+
+        # Randomly select which allele/column will be mutated
+        somatic_col = np.random.randint(0, 2, size=(len(somatic_indicies)))
+        germ_col = np.random.randint(0, 2, size=(len(germ_indicies)))
+
+        # Finally mutate the alleles
+        self.population_genotype[somatic_indicies, somatic_col] ^= 1
+        self.population_germ_genotype[germ_indicies, germ_col] ^= 1
 
 
     def deer_die(self):
@@ -289,6 +306,9 @@ class Simulator():
 
         # Nautrally select fit deers
         self.natural_select()
+
+        # Environmental Mutation
+        self.env_mutation()
 
         # Move the deer + metabolic cost
         self.deer_move()
