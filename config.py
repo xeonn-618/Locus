@@ -72,4 +72,7 @@ grass_max_length = int(2000 * _2d_scale)
 # ==================================================
 # ----------- ANIMATION ----------------------------
 # ==================================================
-tick_time = 1 # Time per tick in miliseconds
+frame_time = 1 # Time per frame in miliseconds
+
+# --- Simulation Speed -----
+ticks_per_frame = 2

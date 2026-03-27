@@ -97,8 +97,36 @@ def run(sim):
     # Update the tick
     def update(frame):
 
-        # Run simulation tick
-        sim.run_tick()
+        # Run simulation tick(s)
+        for _ in range(config.ticks_per_frame):
+            sim.run_tick()
+            # Calculate current sim stats
+            present_N = len(sim.population_coords)
+
+            # If all die, prevent div by zero
+            if present_N > 0:
+                total_alleles = 2 * present_N
+                current_p = sim.population_genotype.sum() / total_alleles
+                current_q = 1 - current_p
+            else:
+                current_p = 0
+                current_q = 0
+
+            # Find genotype counts
+            AA_count = sum(np.sum(sim.population_genotype, axis=1)==2)
+            Aa_count = sum(np.sum(sim.population_genotype, axis=1)==1)
+            aa_count = sum(np.sum(sim.population_genotype, axis=1)==0)
+
+            # Update history lists
+            history_N.append(present_N)
+            history_p.append(current_p)
+            history_q.append(current_q)
+            history_AA.append(AA_count)
+            history_Aa.append(Aa_count)
+            history_aa.append(aa_count)
+            history_ticks.append(sim.tick)
+
+        
 
         # Update the text
         status_text = f"Tick: {sim.tick}\nAvg Food: {np.mean(sim.grass):.1f}\nN: {sim.N}"
@@ -117,32 +145,6 @@ def run(sim):
         genotype_sums = np.sum(sim.population_genotype, axis=1).astype(int)
         new_deer_colors = palette[genotype_sums]
         population_map.set_facecolors(new_deer_colors)
-
-        # Calculate current sim stats
-        present_N = len(sim.population_coords)
-
-        # If all die, prevent div by zero
-        if present_N > 0:
-            total_alleles = 2 * present_N
-            current_p = sim.population_genotype.sum() / total_alleles
-            current_q = 1 - current_p
-        else:
-            current_p = 0
-            current_q = 0
-
-        # Find genotype counts
-        AA_count = sum(np.sum(sim.population_genotype, axis=1)==2)
-        Aa_count = sum(np.sum(sim.population_genotype, axis=1)==1)
-        aa_count = sum(np.sum(sim.population_genotype, axis=1)==0)
-
-        # Update history lists
-        history_N.append(present_N)
-        history_p.append(current_p)
-        history_q.append(current_q)
-        history_AA.append(AA_count)
-        history_Aa.append(Aa_count)
-        history_aa.append(aa_count)
-        history_ticks.append(sim.tick)
 
         # Update line plots
         line_N.set_data(history_ticks, history_N)
@@ -178,7 +180,7 @@ def run(sim):
     # Create the animation object
     ani = animation.FuncAnimation(fig,
                                   update,
-                                  interval=config.tick_time,
+                                  interval=config.frame_time,
                                   blit=False,
                                   cache_frame_data=False
                                   )
