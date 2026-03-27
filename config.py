@@ -9,7 +9,7 @@ year = 10 # ticks per year
 # =========================================================
 
 life_span = 10*year # Max life span of deer
-initial_population_size = 500 # Initial population size of simulation
+initial_population_size = 250 # Initial population size of simulation
 initial_energy = 400 # Initial energy of each deer at start of simulation
 vision_radius = 3 # how far deer an interact; 1 for 3x3 grid with deer at center, 2 for 5x5 " " "
 mating_dist = 5 # eucledian-distance required for two deers to breed
@@ -27,12 +27,12 @@ gestation_period = int(0.7*year) # Gestation period of pregnancy in ticks
 # ====================================================
 
 # -- Allelic Frequency --
-initial_p = 0.8
+initial_p = 0.1
 
 # ---- Fitness -----
-fitness_AA = 0.8
+fitness_AA = 1
 fitness_Aa = 1
-fitness_aa = 0.5
+fitness_aa = 0.9
 
 # ---- Mutation ----
 copy_error_rate = 0.0
