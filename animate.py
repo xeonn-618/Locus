@@ -4,6 +4,7 @@ from matplotlib.patches import Patch
 import mplcyberpunk
 import numpy as np
 import config
+from collections import deque
 
 plt.style.use('cyberpunk')
 
@@ -81,14 +82,17 @@ def run(sim):
 
     fig.tight_layout() 
 
+    # Sliding Window Length
+    window_length = 100
+
     # Data Storage
-    history_ticks = []
-    history_p = []
-    history_q = []
-    history_N = []
-    history_AA = []
-    history_Aa = []
-    history_aa = []
+    history_ticks = deque(maxlen=window_length)
+    history_p = deque(maxlen=window_length)
+    history_q = deque(maxlen=window_length)
+    history_N = deque(maxlen=window_length)
+    history_AA = deque(maxlen=window_length)
+    history_Aa = deque(maxlen=window_length)
+    history_aa = deque(maxlen=window_length)
 
     # Update the tick
     def update(frame):
@@ -159,7 +163,7 @@ def run(sim):
         pop_legend.get_texts()[3].set_text(f"aa: {aa_count}")
 
         # Slide the axis
-        window_start = max(0, sim.tick - 100)
+        window_start = max(0, sim.tick - window_length)
         window_end = max(10, sim.tick + 5)
         ax['freq'].set_xlim(window_start, window_end)
         ax['pop'].set_xlim(window_start, window_end)
