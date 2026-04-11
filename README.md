@@ -1,8 +1,3 @@
-
-https://github.com/user-attachments/assets/c5b33daa-33e3-467f-b14c-bd938027aaf8
-
-
-
 https://github.com/user-attachments/assets/b8b235b0-7409-4ab6-a59a-d9390588f574
 
 
